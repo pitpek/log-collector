@@ -44,7 +44,7 @@
 Вот пример структуры директорий для описанного приложения на Go с использованием Kafka, Redis, PostgreSQL, Docker, Grafana, Prometheus и очередей:
 
 ```
-my-monitoring-app/
+logcollector/
 ├── cmd/
 │   ├── producer/
 │   │   └── main.go
