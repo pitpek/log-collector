@@ -14,7 +14,7 @@ func main() {
 
 	cons := consumer.NewConsumer(cfg)
 	if err := cons.Start(); err != nil {
-		log.Fatalf("cmd/consumer/start.go: Failed to start")
+		log.Fatalf("cmd/consumer/start.go: Failed to start consumer: %v", err)
 	}
 
 }
