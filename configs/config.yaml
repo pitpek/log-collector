@@ -1,5 +1,11 @@
 kafka:
   brokers:
     - kafka:9092
+  topic: log-messages
 
-  topic: "log-messages"
+postgres:
+  host: postgres
+  port: 5432
+  user: postgres
+  password: postgres
+  dbname: log_collector
