@@ -1,5 +1,3 @@
-# Dockerfile
-
 # Используем в качестве базового образа Golang
 FROM golang:1.21.2
 
