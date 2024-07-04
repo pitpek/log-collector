@@ -1,0 +1,4 @@
+CREATE TABLE logs (
+    id SERIAL PRIMARY KEY,
+    newLog TEXT NOT NULL,
+);
