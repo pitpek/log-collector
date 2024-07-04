@@ -31,3 +31,4 @@ func main() {
 	}
 	log.Println("cmd/main.go: Migrations applied successfully")
 }
+
