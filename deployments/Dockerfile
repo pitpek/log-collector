@@ -1,5 +1,3 @@
-# Dockerfile
-
 # Используем в качестве базового образа Golang
 FROM golang:1.21.2
 
@@ -13,7 +11,7 @@ COPY ../ ./
 RUN go mod tidy
 
 # Собираем ваше приложение
-RUN go build -o consumer cmd/consumer/main.go
+RUN go build -o consumer cmd/app/main.go
 
 # Указываем команду для запуска контейнера
-CMD ["./consumer"]
+CMD ["./app"]
