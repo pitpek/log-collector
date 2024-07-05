@@ -33,9 +33,9 @@ func main() {
 
 	err = migrate.StartMigration(db.DB())
 	if err != nil {
-		log.Fatalf("cmd/main.go: Failed to run migrations: %v", err)
+		log.Fatalf("cmd/app/main.go: Failed to run migrations: %v", err)
 	}
-	log.Println("cmd/main.go: Migrations applied successfully")
+	log.Println("cmd/app/main.go: Migrations applied successfully")
 
 	cons := consumer.NewConsumer(cfg.Kafka.Brokers, cfg.Kafka.Topic, cfg.Kafka.Group, db)
 
@@ -44,13 +44,13 @@ func main() {
 
 	go func() {
 		if err := cons.Start(ctx); err != nil {
-			log.Fatalf("cmd/app/start.go: Failed to start consumer: %v", err)
+			log.Fatalf("cmd/app/main.go: Failed to start consumer: %v", err)
 		}
 	}()
 
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 	<-sigCh
-	log.Println("shutting down app")
+	log.Println("cmd/app/main.go: shutting down app")
 	cancel()
 }
