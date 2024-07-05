@@ -1,5 +1,6 @@
 CREATE TABLE logs (
     id SERIAL PRIMARY KEY,
-    newLog TEXT NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

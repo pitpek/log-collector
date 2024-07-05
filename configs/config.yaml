@@ -2,6 +2,7 @@ kafka:
   brokers:
     - kafka:9092
   topic: log-messages
+  group: log-group
 
 postgres:
   host: postgres

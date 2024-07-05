@@ -11,7 +11,7 @@ COPY ../ ./
 RUN go mod tidy
 
 # Собираем ваше приложение
-RUN go build -o consumer cmd/consumer/main.go
+RUN go build -o consumer cmd/app/main.go
 
 # Указываем команду для запуска контейнера
-CMD ["./consumer"]
+CMD ["./app"]
