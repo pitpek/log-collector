@@ -57,3 +57,8 @@ migrate -database postgres://postgres:postgres@localhost:5432/log_collector?sslm
 ```
 docker-compose exec postgres psql -U postgres -d log_collector -c 'SELECT * FROM users;'
 ```
+
+### Запуск линтера
+```
+golint ./...
+```

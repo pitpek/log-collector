@@ -8,11 +8,17 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
+// Consumer представляет собой Kafka consumer, который читает сообщения из Kafka и сохраняет их в базе данных PostgreSQL
 type Consumer struct {
 	reader  *kafka.Reader
 	storage *storage.Postgres
 }
 
+// NewConsumer создает новый экземпляр Kafka consumer
+// brokers - список брокеров Kafka
+// topic - тема Kafka, из которой нужно читать сообщения
+// groupID - ID группы потребителей
+// storage - экземпляр PostgreSQL для сохранения сообщений
 func NewConsumer(brokers []string, topic, groupID string, storage *storage.Postgres) *Consumer {
 	return &Consumer{
 		reader: kafka.NewReader(kafka.ReaderConfig{
@@ -24,6 +30,8 @@ func NewConsumer(brokers []string, topic, groupID string, storage *storage.Postg
 	}
 }
 
+// Start запускает процесс чтения сообщений из Kafka и сохранения их в базе данных
+// ctx - контекст для управления жизненным циклом процесса
 func (c *Consumer) Start(ctx context.Context) error {
 	for {
 		msg, err := c.reader.ReadMessage(ctx)
