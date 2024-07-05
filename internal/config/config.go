@@ -7,6 +7,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// Config содержит конфигурацию для всех используемых сервисов
 type Config struct {
 	Kafka    KafkaConfig    `yaml:"kafka"`
 	Redis    RedisConfig    `yaml:"redis"`
@@ -14,18 +15,21 @@ type Config struct {
 	API      APIConfig      `yaml:"api"`
 }
 
+// KafkaConfig содержит конфигурацию для Kafka
 type KafkaConfig struct {
 	Brokers []string `yaml:"brokers"`
 	Topic   string   `yaml:"topic"`
 	Group   string   `yaml:"group"`
 }
 
+// RedisConfig содержит конфигурацию для Redis
 type RedisConfig struct {
 	Address  string `yaml:"address"`
 	Password string `yaml:"password"`
 	DB       int    `yaml:"db"`
 }
 
+// PostgresConfig содержит конфигурацию для PostgreSQL
 type PostgresConfig struct {
 	Host     string `yaml:"host"`
 	Port     int    `yaml:"port"`
@@ -34,10 +38,12 @@ type PostgresConfig struct {
 	DBName   string `yaml:"dbname"`
 }
 
+// APIConfig содержит конфигурацию для API
 type APIConfig struct {
 	Port int `yaml:"port"`
 }
 
+// LoadConfig загружает конфигурацию из файла config.yaml
 func LoadConfig() (*Config, error) {
 	data, err := os.ReadFile("configs/config.yaml")
 	if err != nil {

@@ -8,9 +8,13 @@ import (
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
+
+	// импортируем драйвер файловой системы для миграций
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
+// StartMigration выполняет миграции базы данных PostgreSQL
+// db - открытое соединение с базой данных PostgreSQL
 func StartMigration(db *sql.DB) error {
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
@@ -26,7 +30,7 @@ func StartMigration(db *sql.DB) error {
 		return err
 	}
 
-	// Apply the migrations
+	// Применение миграций
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 		slog.Error("Could not run up migrations: ", "error", err)
 		return err
