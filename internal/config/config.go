@@ -44,8 +44,8 @@ type APIConfig struct {
 }
 
 // LoadConfig загружает конфигурацию из файла config.yaml
-func LoadConfig() (*Config, error) {
-	data, err := os.ReadFile("configs/config.yaml")
+func LoadConfig(configPath string) (*Config, error) {
+	data, err := os.ReadFile(configPath)
 	if err != nil {
 		slog.Error("internal/config/config.go: Couldn't read config.yaml: ", "error", err)
 		return nil, err
