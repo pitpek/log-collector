@@ -23,7 +23,8 @@ docker-compose logs -f
 
 ### Пересоздать контейнер и запустить его
 ```
-docker-compose up --build
+docker-compose up --build    из директории /derloyments
+docker-compose -f deployments/docker-compose.yml up --build    из корня проекта      
 ```
 
 ### Проверка статуса и портов
