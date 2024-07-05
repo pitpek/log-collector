@@ -67,3 +67,4 @@ services:
 networks:
   log-collector:
     driver: bridge
+    

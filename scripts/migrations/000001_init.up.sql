@@ -3,3 +3,4 @@ CREATE TABLE logs (
     message TEXT NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
