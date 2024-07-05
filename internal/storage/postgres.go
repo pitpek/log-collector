@@ -34,3 +34,8 @@ func (p *Postgres) DB() *sql.DB {
 func (p *Postgres) Ping() error {
 	return p.db.Ping()
 }
+
+func (p *Postgres) InsertMessage(message string) error {
+	_, err := p.DB().Exec(`INSERT INTO logs (message) VALUES ($1)`, message)
+	return err
+}
