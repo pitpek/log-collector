@@ -8,7 +8,7 @@ services:
     ports:
       - 22181:2181
     networks:
-      - log-collector
+      - logcollector_net
   
 
   kafka:
@@ -25,12 +25,21 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     networks:
-      - log-collector
+      - logcollector_net
+
+
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - logcollector_net
 
 
   postgres:
-    container_name: postgres
     image: postgres
+    container_name: postgres
     environment:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "postgres"
@@ -38,7 +47,7 @@ services:
     ports:
       - "5432:5432"
     networks:
-      - log-collector
+      - logcollector_net
 
 
   app:
@@ -47,11 +56,15 @@ services:
         dockerfile: deployments/Dockerfile
     depends_on:
       - postgres
+      - redis
+      - kafka
     environment:
       KAFKA_BROKER: kafka:9092
     command: ["sh", "-c", "sleep 10 && go run cmd/app/main.go"]
+    ports:
+      - 8080:8080
     networks:
-      - log-collector
+      - logcollector_net
 
 
   producer:
@@ -61,10 +74,10 @@ services:
       KAFKA_BROKER: kafka:9092
     command: ["sh", "-c", "sleep 10 && go run main.go"]
     networks:
-      - log-collector
+      - logcollector_net
 
 
 networks:
-  log-collector:
+  logcollector_net:
     driver: bridge
     
