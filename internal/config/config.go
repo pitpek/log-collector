@@ -1,7 +1,7 @@
 package config
 
 import (
-	"log/slog"
+	"log"
 	"os"
 
 	"gopkg.in/yaml.v2"
@@ -47,13 +47,13 @@ type APIConfig struct {
 func LoadConfig(configPath string) (*Config, error) {
 	data, err := os.ReadFile(configPath)
 	if err != nil {
-		slog.Error("internal/config/config.go: Couldn't read config.yaml: ", "error", err)
+		log.Printf("internal/config/config.go: Couldn't read config.yaml: %v", err)
 		return nil, err
 	}
 
 	var cfg Config
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
-		slog.Error("internal/config/config.go: Couldn't unmarshal config.yaml: ", "error", err)
+		log.Printf("internal/config/config.go: Couldn't unmarshal config.yaml: %v", err)
 		return nil, err
 	}
 
