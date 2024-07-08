@@ -3,7 +3,7 @@ package consumer
 import (
 	"context"
 	"log"
-	"logcollector/internal/storage"
+	"logcollector/internal/storage/postgres"
 
 	"github.com/segmentio/kafka-go"
 )
@@ -11,7 +11,7 @@ import (
 // Consumer представляет собой Kafka consumer, который читает сообщения из Kafka и сохраняет их в базе данных PostgreSQL
 type Consumer struct {
 	reader  *kafka.Reader
-	storage *storage.Postgres
+	storage *postgres.Postgres
 }
 
 // NewConsumer создает новый экземпляр Kafka consumer
@@ -19,7 +19,7 @@ type Consumer struct {
 // topic - тема Kafka, из которой нужно читать сообщения
 // groupID - ID группы потребителей
 // storage - экземпляр PostgreSQL для сохранения сообщений
-func NewConsumer(brokers []string, topic, groupID string, storage *storage.Postgres) *Consumer {
+func NewConsumer(brokers []string, topic, groupID string, storage *postgres.Postgres) *Consumer {
 	return &Consumer{
 		reader: kafka.NewReader(kafka.ReaderConfig{
 			Brokers: brokers,

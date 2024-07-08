@@ -1,11 +1,10 @@
-package storage
+package postgres
 
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"logcollector/internal/config"
-
-	"log/slog"
 )
 
 // Postgres представляет собой структуру, которая оборачивает соединение с базой данных PostgreSQL
@@ -20,7 +19,7 @@ func NewPostgres(cfg *config.PostgresConfig) (*Postgres, error) {
 		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DBName)
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		slog.Error("internal/storage/postgres.go: Failed to start postgres: ", "error", err)
+		log.Printf("internal/storage/postgres.go: Failed to start postgres: %v", err)
 		return nil, err
 	}
 	return &Postgres{db: db}, nil

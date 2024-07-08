@@ -1,8 +1,18 @@
+api:
+  port: 8080
+
 kafka:
   brokers:
     - kafka:9092
   topic: log-messages
   group: log-group
+
+
+redis:
+  address: redis:6379
+  password: ""
+  db: 0
+
 
 postgres:
   host: postgres
