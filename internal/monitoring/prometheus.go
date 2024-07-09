@@ -2,7 +2,9 @@ package monitoring
 
 import (
 	"net/http"
+	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -13,7 +15,7 @@ var (
 			Name: "http_requests_total",
 			Help: "Total number of HTTP requests",
 		},
-		[]string{"path"},
+		[]string{"path", "method"},
 	)
 	httpRequestDuration = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
@@ -21,7 +23,7 @@ var (
 			Help:    "Duration of HTTP requests",
 			Buckets: prometheus.DefBuckets,
 		},
-		[]string{"path"},
+		[]string{"path", "method"},
 	)
 )
 
@@ -31,14 +33,22 @@ func init() {
 	prometheus.MustRegister(httpRequestDuration)
 }
 
-// RecordRequest увеличивает счетчик HTTP-запросов
-func RecordRequest(path string) {
-	httpRequestsTotal.WithLabelValues(path).Inc()
-}
+// MetricsMiddleware регистрирует метрики для каждого HTTP-запроса
+func MetricsMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		start := time.Now()
 
-// NewRequestTimer создает новый таймер для измерения времени выполнения запроса
-func NewRequestTimer(path string) *prometheus.Timer {
-	return prometheus.NewTimer(httpRequestDuration.WithLabelValues(path))
+		// Обработка запроса
+		c.Next()
+
+		duration := time.Since(start).Seconds()
+		path := c.FullPath()
+		method := c.Request.Method
+
+		// Регистрация метрик
+		httpRequestsTotal.WithLabelValues(path, method).Inc()
+		httpRequestDuration.WithLabelValues(path, method).Observe(duration)
+	}
 }
 
 // PrometheusHandler возвращает HTTP-обработчик для метрик Prometheus
