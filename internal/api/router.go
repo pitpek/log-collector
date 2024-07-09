@@ -10,6 +10,9 @@ import (
 func InitRoutes() *gin.Engine {
 	router := gin.New()
 
+	// Добавление middleware для регистрации метрик
+	router.Use(monitoring.MetricsMiddleware())
+
 	metrics := router.Group("/metrics")
 	{
 		metrics.GET("/", gin.WrapH(monitoring.PrometheusHandler()))
