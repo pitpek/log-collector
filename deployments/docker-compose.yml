@@ -49,7 +49,7 @@ services:
     networks:
       - logcollector_net
 
-
+  
   app:
     build:
         context: ..   #необходимо указать путь к Dockerfile
@@ -70,9 +70,49 @@ services:
   producer:
     build:
       context: ../../logproducer  #необходимо указать путь к исполняемому файлу producer в другом микросервисе 
+    depends_on:
+      - postgres
+      - redis
+      - kafka
     environment:
       KAFKA_BROKER: kafka:9092
     command: ["sh", "-c", "sleep 10 && go run main.go"]
+    networks:
+      - logcollector_net
+
+
+  prometheus:
+    image: prom/prometheus
+    depends_on:
+      - app
+      - producer
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - logcollector_net
+
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    ports:
+      - "3000:3000"
+    networks:
+      - logcollector_net
+
+  
+  node_exporter:
+    image: prom/node-exporter
+    container_name: node_exporter
+    ports:
+      - "9100:9100"
     networks:
       - logcollector_net
 
