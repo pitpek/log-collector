@@ -29,6 +29,7 @@ type RedisConfig struct {
 	DB       int    `yaml:"db"`
 }
 
+// ClickHouseConfig содержит конфигурацию для ClickHouse
 type ClickHouseConfig struct {
 	Host     string `yaml:"host"`
 	Port     int    `yaml:"port"`

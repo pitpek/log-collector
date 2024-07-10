@@ -9,6 +9,7 @@ import (
 	"logcollector/internal/server"
 	"logcollector/internal/storage/clickhouse"
 	"logcollector/internal/storage/redis"
+	"logcollector/pkg/migrate"
 	"net/http"
 	"os"
 	"os/signal"
@@ -37,7 +38,7 @@ func main() {
 	log.Println("cmd/app/main.go: Database clickhouse connected")
 
 	// Создание таблиц в Clickhouse
-	err = clickhouse.CreateTables(db.DB())
+	err = migrate.StartMigration(db.DB())
 	if err != nil {
 		log.Fatalf("cmd/app/main.go: Failed to create clickhouse tables: %v", err)
 	}

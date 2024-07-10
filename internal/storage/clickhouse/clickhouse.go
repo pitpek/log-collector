@@ -54,18 +54,3 @@ func (c *ClickHouse) InsertMessage(date time.Time, message string) error {
 	}
 	return nil
 }
-
-// CreateTables создает необходимые таблицы в базе данных
-func CreateTables(db *sql.DB) error {
-	_, err := db.Exec(`
-		CREATE TABLE IF NOT EXISTS logs (
-			date DateTime,
-			message String
-		) ENGINE = MergeTree()
-		ORDER BY date
-	`)
-	if err != nil {
-		log.Printf("internal/storage/clickhouse.go: Failed to create table logs in ClickHouse: %v", err)
-	}
-	return err
-}
