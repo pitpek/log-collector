@@ -7,9 +7,8 @@ import (
 	"logcollector/internal/config"
 	"logcollector/internal/consumer"
 	"logcollector/internal/server"
-	"logcollector/internal/storage/postgres"
+	"logcollector/internal/storage/clickhouse"
 	"logcollector/internal/storage/redis"
-	"logcollector/pkg/migrate"
 	"net/http"
 	"os"
 	"os/signal"
@@ -24,25 +23,46 @@ func main() {
 	}
 
 	// Инициализация PostgreSQL
-	db, err := postgres.NewPostgres(&cfg.Postgres)
+	// db, err := postgres.NewPostgres(&cfg.Postgres)
+	// if err != nil {
+	// 	log.Fatalf("cmd/app/main.go: Failed to start postgres: %v", err)
+	// }
+	// defer db.Close()
+
+	// // Проверка подключения к Postgres
+	// err = db.Ping()
+	// if err != nil {
+	// 	log.Fatalf("cmd/app/main.go: Failed to ping postgres: %v", err)
+	// }
+	// log.Println("cmd/app/main.go: Database postgres connected")
+
+	// Выполнение миграций
+	// err = migrate.StartMigration(db.DB())
+	// if err != nil {
+	// 	log.Fatalf("cmd/app/main.go: Failed to run postgres migrations: %v", err)
+	// }
+	// log.Println("cmd/app/main.go: Migrations postgres applied successfully")
+
+	// Инициализация ClickHouse
+	db, err := clickhouse.NewClickHouse(&cfg.ClickHouse)
 	if err != nil {
-		log.Fatalf("cmd/app/main.go: Failed to start postgres: %v", err)
+		log.Fatalf("cmd/app/main.go: Failed to start clickhouse: %v", err)
 	}
 	defer db.Close()
 
-	// Проверка подключения к Postgres
+	// Проверка подключения к ClickHouse
 	err = db.Ping()
 	if err != nil {
-		log.Fatalf("cmd/app/main.go: Failed to ping postgres: %v", err)
+		log.Fatalf("cmd/app/main.go: Failed to ping clickhouse: %v", err)
 	}
-	log.Println("cmd/app/main.go: Database connected")
+	log.Println("cmd/app/main.go: Database clickhouse connected")
 
-	// Выполнение миграций
-	err = migrate.StartMigration(db.DB())
+	// Создание таблиц в Clickhouse
+	err = clickhouse.CreateTables(db.DB())
 	if err != nil {
-		log.Fatalf("cmd/app/main.go: Failed to run migrations: %v", err)
+		log.Fatalf("cmd/app/main.go: Failed to create clickhouse tables: %v", err)
 	}
-	log.Println("cmd/app/main.go: Migrations applied successfully")
+	log.Println("cmd/app/main.go: Tables clickhouse created successfully")
 
 	// Инициализация Redis
 	redisClient, err := redis.NewClient(&cfg.Redis)
