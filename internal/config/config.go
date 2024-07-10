@@ -11,7 +11,6 @@ import (
 type Config struct {
 	Kafka      KafkaConfig      `yaml:"kafka"`
 	Redis      RedisConfig      `yaml:"redis"`
-	Postgres   PostgresConfig   `yaml:"postgres"`
 	ClickHouse ClickHouseConfig `yaml:"clickhouse"`
 	API        APIConfig        `yaml:"api"`
 }
@@ -28,15 +27,6 @@ type RedisConfig struct {
 	Address  string `yaml:"address"`
 	Password string `yaml:"password"`
 	DB       int    `yaml:"db"`
-}
-
-// PostgresConfig содержит конфигурацию для PostgreSQL
-type PostgresConfig struct {
-	Host     string `yaml:"host"`
-	Port     int    `yaml:"port"`
-	User     string `yaml:"user"`
-	Password string `yaml:"password"`
-	DBName   string `yaml:"dbname"`
 }
 
 type ClickHouseConfig struct {

@@ -19,12 +19,6 @@ kafka:
   brokers: ["kafka:9092"]
   topic: "test_topic"
   group: "test_group"
-postgres:
-  host: "localhost"
-  port: 5432
-  user: "user"
-  password: "password"
-  dbname: "dbname"
 api:
   port: 8080
 `))
@@ -39,10 +33,5 @@ api:
 	assert.Equal(t, "kafka:9092", cfg.Kafka.Brokers[0])
 	assert.Equal(t, "test_topic", cfg.Kafka.Topic)
 	assert.Equal(t, "test_group", cfg.Kafka.Group)
-	assert.Equal(t, "localhost", cfg.Postgres.Host)
-	assert.Equal(t, 5432, cfg.Postgres.Port)
-	assert.Equal(t, "user", cfg.Postgres.User)
-	assert.Equal(t, "password", cfg.Postgres.Password)
-	assert.Equal(t, "dbname", cfg.Postgres.DBName)
 	assert.Equal(t, 8080, cfg.API.Port)
 }

@@ -22,27 +22,6 @@ func main() {
 		log.Fatalf("cmd/app/main.go: Failed to load config: %v", err)
 	}
 
-	// Инициализация PostgreSQL
-	// db, err := postgres.NewPostgres(&cfg.Postgres)
-	// if err != nil {
-	// 	log.Fatalf("cmd/app/main.go: Failed to start postgres: %v", err)
-	// }
-	// defer db.Close()
-
-	// // Проверка подключения к Postgres
-	// err = db.Ping()
-	// if err != nil {
-	// 	log.Fatalf("cmd/app/main.go: Failed to ping postgres: %v", err)
-	// }
-	// log.Println("cmd/app/main.go: Database postgres connected")
-
-	// Выполнение миграций
-	// err = migrate.StartMigration(db.DB())
-	// if err != nil {
-	// 	log.Fatalf("cmd/app/main.go: Failed to run postgres migrations: %v", err)
-	// }
-	// log.Println("cmd/app/main.go: Migrations postgres applied successfully")
-
 	// Инициализация ClickHouse
 	db, err := clickhouse.NewClickHouse(&cfg.ClickHouse)
 	if err != nil {
