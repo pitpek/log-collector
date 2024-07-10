@@ -41,20 +41,34 @@ services:
     image: postgres
     container_name: postgres
     environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: log_collector
     ports:
       - "5432:5432"
     networks:
       - logcollector_net
 
-  
+
+  clickhouse:
+    image: yandex/clickhouse-server
+    container_name: clickhouse
+    ports:
+      - "9000:9000" # TCP интерфейс
+    environment:
+      CLICKHOUSE_DB: log_collector
+      CLICKHOUSE_USER: clickhouse
+      CLICKHOUSE_PASSWORD: clickhouse
+    networks:
+      - logcollector_net
+
+
   app:
     build:
         context: ..   #необходимо указать путь к Dockerfile
         dockerfile: deployments/Dockerfile
     depends_on:
+      - clickhouse
       - postgres
       - redis
       - kafka
@@ -71,6 +85,7 @@ services:
     build:
       context: ../../logproducer  #необходимо указать путь к исполняемому файлу producer в другом микросервисе 
     depends_on:
+      - clickhouse
       - postgres
       - redis
       - kafka
