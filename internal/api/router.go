@@ -15,7 +15,7 @@ func InitRoutes() *gin.Engine {
 
 	metrics := router.Group("/metrics")
 	{
-		metrics.GET("/", gin.WrapH(monitoring.PrometheusHandler()))
+		metrics.GET("/", gin.WrapH(prometheusHandler()))
 	}
 
 	return router

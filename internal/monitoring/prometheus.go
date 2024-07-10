@@ -1,12 +1,10 @@
 package monitoring
 
 import (
-	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var (
@@ -49,9 +47,4 @@ func MetricsMiddleware() gin.HandlerFunc {
 		httpRequestsTotal.WithLabelValues(path, method).Inc()
 		httpRequestDuration.WithLabelValues(path, method).Observe(duration)
 	}
-}
-
-// PrometheusHandler возвращает HTTP-обработчик для метрик Prometheus
-func PrometheusHandler() http.Handler {
-	return promhttp.Handler()
 }
