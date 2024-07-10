@@ -1,0 +1,85 @@
+{
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "gnetId": null,
+    "graphTooltip": 0,
+    "id": null,
+    "iteration": 1636540572492,
+    "links": [],
+    "panels": [
+      {
+        "datasource": "Prometheus",
+        "fieldConfig": {
+          "defaults": {
+            "custom": {},
+            "unit": "percent"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        },
+        "id": 1,
+        "options": {
+          "orientation": "horizontal",
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true
+        },
+        "pluginVersion": "7.5.7",
+        "targets": [
+          {
+            "expr": "sum(go_goroutines)",
+            "interval": "",
+            "legendFormat": "Go Routines",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(go_memstats_alloc_bytes)",
+            "interval": "",
+            "legendFormat": "Memory Allocated",
+            "refId": "B"
+          },
+          {
+            "expr": "sum(go_gc_duration_seconds_sum) / sum(go_gc_duration_seconds_count)",
+            "interval": "",
+            "legendFormat": "GC Duration",
+            "refId": "C"
+          }
+        ],
+        "title": "Go Application Metrics",
+        "type": "gauge"
+      }
+    ],
+    "refresh": "5s",
+    "schemaVersion": 27,
+    "style": "dark",
+    "tags": [],
+    "templating": {
+      "list": []
+    },
+    "time": {
+      "from": "now-5m",
+      "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "Go Application Dashboard",
+    "uid": "go-application-dashboard",
+    "version": 1
+  }
+  
