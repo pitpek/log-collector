@@ -4,17 +4,19 @@ import (
 	"database/sql"
 	"log"
 
-	"log/slog"
-
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
+
+	// импортируем драйвер файловой системы для миграций
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
+// StartMigration выполняет миграции базы данных PostgreSQL
+// db - открытое соединение с базой данных PostgreSQL
 func StartMigration(db *sql.DB) error {
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
-		slog.Error("Could not create database driver: ", "error", err)
+		log.Printf("pkg/migrate/migrate.go: Could not create database driver: %v", err)
 		return err
 	}
 
@@ -22,16 +24,16 @@ func StartMigration(db *sql.DB) error {
 		"file://scripts/migrations",
 		"postgres", driver)
 	if err != nil {
-		slog.Error("Could not create migrate instance: ", "error", err)
+		log.Printf("pkg/migrate/migrate.go: Could not create migrate instance: %v", err)
 		return err
 	}
 
-	// Apply the migrations
+	// Применение миграций
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		slog.Error("Could not run up migrations: ", "error", err)
+		log.Printf("pkg/migrate/migrate.go: Could not run up migrations: %v", err)
 		return err
 	}
 
-	log.Println("Migrations applied successfully")
+	log.Println("pkg/migrate/migrate.go: Migrations applied successfully")
 	return nil
 }

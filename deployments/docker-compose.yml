@@ -8,7 +8,7 @@ services:
     ports:
       - 22181:2181
     networks:
-      - log-collector
+      - logcollector_net
   
 
   kafka:
@@ -25,20 +25,42 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     networks:
-      - log-collector
+      - logcollector_net
+
+
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - logcollector_net
 
 
   postgres:
-    container_name: postgres
     image: postgres
+    container_name: postgres
     environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: log_collector
     ports:
       - "5432:5432"
     networks:
-      - log-collector
+      - logcollector_net
+
+
+  clickhouse:
+    image: yandex/clickhouse-server
+    container_name: clickhouse
+    ports:
+      - "9000:9000" # TCP интерфейс
+    environment:
+      CLICKHOUSE_DB: log_collector
+      CLICKHOUSE_USER: clickhouse
+      CLICKHOUSE_PASSWORD: clickhouse
+    networks:
+      - logcollector_net
 
 
   app:
@@ -46,25 +68,71 @@ services:
         context: ..   #необходимо указать путь к Dockerfile
         dockerfile: deployments/Dockerfile
     depends_on:
+      - clickhouse
       - postgres
+      - redis
+      - kafka
     environment:
       KAFKA_BROKER: kafka:9092
     command: ["sh", "-c", "sleep 10 && go run cmd/app/main.go"]
+    ports:
+      - 8080:8080
     networks:
-      - log-collector
+      - logcollector_net
 
 
   producer:
     build:
       context: ../../logproducer  #необходимо указать путь к исполняемому файлу producer в другом микросервисе 
+    depends_on:
+      - clickhouse
+      - postgres
+      - redis
+      - kafka
     environment:
       KAFKA_BROKER: kafka:9092
     command: ["sh", "-c", "sleep 10 && go run main.go"]
     networks:
-      - log-collector
+      - logcollector_net
+
+
+  prometheus:
+    image: prom/prometheus
+    depends_on:
+      - app
+      - producer
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - logcollector_net
+
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    ports:
+      - "3000:3000"
+    networks:
+      - logcollector_net
+
+  
+  node_exporter:
+    image: prom/node-exporter
+    container_name: node_exporter
+    ports:
+      - "9100:9100"
+    networks:
+      - logcollector_net
 
 
 networks:
-  log-collector:
+  logcollector_net:
     driver: bridge
     

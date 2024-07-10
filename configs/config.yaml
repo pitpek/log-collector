@@ -1,12 +1,23 @@
+api:
+  port: 8080
+
+
 kafka:
   brokers:
     - kafka:9092
   topic: log-messages
   group: log-group
 
-postgres:
-  host: postgres
-  port: 5432
-  user: postgres
-  password: postgres
+
+redis:
+  address: redis:6379
+  password: ""
+  db: 0
+
+
+clickhouse:
+  host: clickhouse
+  port: 9000
+  user: clickhouse
+  password: clickhouse
   dbname: log_collector

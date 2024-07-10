@@ -46,14 +46,23 @@
 ```
 logcollector/
 ├── cmd/
-│   ├── producer/
-│   │   └── main.go
-│   ├── consumer/
-│   │   └── main.go
-│   └── api/
+│   └── app/
 │       └── main.go
+├── configs/
+│   └── config.yaml
+├── deployments/
+│   ├── docker-compose.yml
+│   ├── Dockerfile
+│   ├── grafana/
+│   │   └── dashboards/
+│   └── prometheus/
+│       └── prometheus.yml
+├── docs/
+│   ├── architecture.md
+│   └── setup.md
 ├── internal/
 │   ├── config/
+│   │   ├── config_test.go
 │   │   └── config.go
 │   ├── producer/
 │   │   ├── producer.go
@@ -61,7 +70,10 @@ logcollector/
 │   ├── consumer/
 │   │   ├── consumer.go
 │   │   └── consumer_test.go
-│   ├── api/
+│   ├── monitoring/
+│   │    ├── prometheus.go
+│   │    └── grafana.go
+│   │── api/
 │   │   ├── handler.go
 │   │   ├── router.go
 │   │   └── middleware.go
@@ -69,9 +81,6 @@ logcollector/
 │   │   ├── postgres.go
 │   │   ├── redis.go
 │   │   └── storage_test.go
-│   └── monitoring/
-│       ├── prometheus.go
-│       └── grafana.go
 ├── pkg/
 │   ├── kafka/
 │   │   ├── producer.go
@@ -80,32 +89,19 @@ logcollector/
 │   ├── redis/
 │   │   ├── redis.go
 │   │   └── redis_test.go
-│   └── postgres/
-│       ├── postgres.go
-│       └── postgres_test.go
-├── deployments/
-│   ├── docker-compose.yml
-│   ├── Dockerfile.producer
-│   ├── Dockerfile.consumer
-│   ├── Dockerfile.api
-│   ├── grafana/
-│   │   └── dashboards/
-│   └── prometheus/
-│       └── prometheus.yml
+│   ├── postgres/
+│   │   ├── postgres.go
+│   │   └── postgres_test.go
+│   └── migrate/
+│       └── migrate.go
 ├── scripts/
-│   ├── init_db.sql
-│   └── migrate.sh
-├── configs/
-│   ├── config.yaml
-│   └── secrets.yaml
-├── docs/
-│   ├── architecture.md
-│   ├── api.md
-│   └── setup.md
-├── .env
+│   └── migrations/
+│       ├── init_db.sql
+│       └── migrate.sh
 ├── .gitignore
 ├── go.mod
-└── go.sum
+├── go.sum
+└── README.md
 ```
 
 ### Описание директорий и файлов:
