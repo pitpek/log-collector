@@ -62,3 +62,13 @@ docker-compose exec postgres psql -U postgres -d log_collector -c 'SELECT * FROM
 ```
 golint ./...
 ```
+
+### Подключиться к clickhouse через docker
+```
+docker exec -it clickhouse clickhouse-client -h localhost --user clickhouse --password clickhouse
+```
+
+### Открыть таблицу в clickhouse
+```
+use log_collector
+```
