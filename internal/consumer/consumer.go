@@ -3,7 +3,8 @@ package consumer
 import (
 	"context"
 	"log"
-	"logcollector/internal/storage/postgres"
+	"logcollector/internal/storage/clickhouse"
+	"time"
 
 	"github.com/segmentio/kafka-go"
 )
@@ -11,7 +12,7 @@ import (
 // Consumer представляет собой Kafka consumer, который читает сообщения из Kafka и сохраняет их в базе данных PostgreSQL
 type Consumer struct {
 	reader  *kafka.Reader
-	storage *postgres.Postgres
+	storage *clickhouse.ClickHouse
 }
 
 // NewConsumer создает новый экземпляр Kafka consumer
@@ -19,7 +20,7 @@ type Consumer struct {
 // topic - тема Kafka, из которой нужно читать сообщения
 // groupID - ID группы потребителей
 // storage - экземпляр PostgreSQL для сохранения сообщений
-func NewConsumer(brokers []string, topic, groupID string, storage *postgres.Postgres) *Consumer {
+func NewConsumer(brokers []string, topic, groupID string, storage *clickhouse.ClickHouse) *Consumer {
 	return &Consumer{
 		reader: kafka.NewReader(kafka.ReaderConfig{
 			Brokers: brokers,
@@ -40,7 +41,9 @@ func (c *Consumer) Start(ctx context.Context) error {
 			continue
 		}
 
-		if err := c.storage.InsertMessage(string(msg.Value)); err != nil {
+		// Вставка сообщения с текущим временем
+		err = c.storage.InsertMessage(time.Now(), string(msg.Value))
+		if err != nil {
 			log.Printf("internal/consumer/consumer.go: could not insert message: %v", err)
 		} else {
 			log.Printf("internal/consumer/consumer.go: message stored: %s", string(msg.Value))
