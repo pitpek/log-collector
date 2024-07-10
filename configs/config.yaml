@@ -1,6 +1,7 @@
 api:
   port: 8080
 
+
 kafka:
   brokers:
     - kafka:9092
@@ -19,4 +20,12 @@ postgres:
   port: 5432
   user: postgres
   password: postgres
+  dbname: log_collector
+
+
+clickhouse:
+  host: clickhouse
+  port: 9000
+  user: clickhouse
+  password: clickhouse
   dbname: log_collector
