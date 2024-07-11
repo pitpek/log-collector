@@ -6,6 +6,7 @@ import (
 	"logcollector/internal/api"
 	"logcollector/internal/config"
 	"logcollector/internal/consumer"
+	"logcollector/internal/producer"
 	"logcollector/internal/server"
 	"logcollector/internal/storage/clickhouse"
 	"logcollector/internal/storage/redis"
@@ -59,7 +60,7 @@ func main() {
 	log.Println("cmd/app/main.go: Redis connected successfully")
 
 	// Инициализация Consumer
-	cons := consumer.NewConsumer(cfg.Kafka.Brokers, cfg.Kafka.Topic, cfg.Kafka.Group, db)
+	cons := consumer.NewConsumer(cfg.Kafka.Brokers, cfg.Kafka.Topic, db)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -71,11 +72,20 @@ func main() {
 	}()
 	log.Println("cmd/app/main.go: Consumer started successfully")
 
+	// Инициализация Producer
+	prod := producer.NewProducer(cfg.Kafka.Brokers, cfg.Kafka.Topic)
+	go func() {
+		if err := prod.Start(ctx, cfg.Kafka.Key); err != nil {
+			log.Fatalf("cmd/app/main.go: Failed to start producer: %v", err)
+		}
+	}()
+	log.Println("cmd/app/main.go: Producer started successfully")
+
 	// Запуск HTTP-сервера
 	serv := new(server.Server)
 	go func() {
 		if err := serv.Run(cfg.API.Port, api.InitRoutes()); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("cmd/app/main.go: Server start error: %v", err)
+			log.Fatalf("cmd/app/main.go: Failed to start server: %v", err)
 		}
 	}()
 	log.Println("cmd/app/main.go: Server started successfully")

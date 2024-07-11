@@ -45,9 +45,15 @@ func (c *ClickHouse) Ping() error {
 
 // InsertMessage вставляет сообщение в таблицу logs
 // date - дата и время сообщения
+// key - назваение приложения с которого пришло сообщение
 // message - сообщение, которое нужно вставить
-func (c *ClickHouse) InsertMessage(date time.Time, message string) error {
-	_, err := c.db.Exec("INSERT INTO logs (date, message) VALUES (?, ?)", date, message)
+func (c *ClickHouse) InsertMessage(date time.Time, key, message string) error {
+	_, err := c.db.Exec(`
+		INSERT INTO logs 
+		(date, app_name, message) 
+		VALUES (?, ?, ?)`,
+		date, key, message,
+	)
 	if err != nil {
 		log.Printf("internal/storage/clickhouse.go: Failed to insert message into ClickHouse: %v", err)
 		return err

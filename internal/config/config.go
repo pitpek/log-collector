@@ -19,7 +19,7 @@ type Config struct {
 type KafkaConfig struct {
 	Brokers []string `yaml:"brokers"`
 	Topic   string   `yaml:"topic"`
-	Group   string   `yaml:"group"`
+	Key     string   `yaml:"key"`
 }
 
 // RedisConfig содержит конфигурацию для Redis

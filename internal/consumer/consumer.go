@@ -20,12 +20,11 @@ type Consumer struct {
 // topic - тема Kafka, из которой нужно читать сообщения
 // groupID - ID группы потребителей
 // storage - экземпляр PostgreSQL для сохранения сообщений
-func NewConsumer(brokers []string, topic, groupID string, storage *clickhouse.ClickHouse) *Consumer {
+func NewConsumer(brokers []string, topic string, storage *clickhouse.ClickHouse) *Consumer {
 	return &Consumer{
 		reader: kafka.NewReader(kafka.ReaderConfig{
 			Brokers: brokers,
 			Topic:   topic,
-			GroupID: groupID,
 		}),
 		storage: storage,
 	}
@@ -42,7 +41,7 @@ func (c *Consumer) Start(ctx context.Context) error {
 		}
 
 		// Вставка сообщения с текущим временем
-		err = c.storage.InsertMessage(time.Now(), string(msg.Value))
+		err = c.storage.InsertMessage(time.Now(), string(msg.Key), string(msg.Value))
 		if err != nil {
 			log.Printf("internal/consumer/consumer.go: could not insert message: %v", err)
 		} else {

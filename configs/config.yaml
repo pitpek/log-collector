@@ -6,13 +6,15 @@ kafka:
   brokers:
     - kafka:9092
   topic: log-messages
-  group: log-group
+  key: log_collector
+  
 
 
 redis:
   address: redis:6379
   password: ""
   db: 0
+
 
 
 clickhouse:
