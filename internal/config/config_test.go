@@ -18,7 +18,7 @@ func TestLoadConfig(t *testing.T) {
 kafka:
   brokers: ["kafka:9092"]
   topic: "test_topic"
-  group: "test_group"
+  key: "test_key"
 postgres:
   host: "localhost"
   port: 5432
@@ -38,7 +38,7 @@ api:
 	// Проверяем загруженные данные
 	assert.Equal(t, "kafka:9092", cfg.Kafka.Brokers[0])
 	assert.Equal(t, "test_topic", cfg.Kafka.Topic)
-	assert.Equal(t, "test_group", cfg.Kafka.Group)
+	assert.Equal(t, "test_key", cfg.Kafka.Key)
 	assert.Equal(t, "localhost", cfg.Postgres.Host)
 	assert.Equal(t, 5432, cfg.Postgres.Port)
 	assert.Equal(t, "user", cfg.Postgres.User)
