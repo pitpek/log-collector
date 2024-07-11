@@ -11,7 +11,6 @@ func StartMigration(db *sql.DB) error {
 		CREATE TABLE IF NOT EXISTS logs (
 			date DateTime,
 			app_name String,
-			message String
 		) ENGINE = MergeTree()
 		ORDER BY date
 	`)
