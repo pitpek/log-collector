@@ -8,15 +8,15 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
-type Producer struct {
+type Writer struct {
 	writer *kafka.Writer
 }
 
 // NewProducer создает новый экземпляр Kafka producer
 // brokers - список брокеров Kafka
 // topic - тема Kafka, в которую нужно отправлять сообщения
-func NewProducer(brokers []string, topic string) *Producer {
-	return &Producer{
+func NewWriter(brokers []string, topic string) *Writer {
+	return &Writer{
 		writer: &kafka.Writer{
 			Addr:     kafka.TCP(brokers...),
 			Topic:    topic,
@@ -27,7 +27,7 @@ func NewProducer(brokers []string, topic string) *Producer {
 
 // Start запускает процесс отправки сообщений в Kafka
 // ctx - контекст для управления жизненным циклом процесса
-func (p *Producer) Start(ctx context.Context, key string) error {
+func (p *Writer) Start(ctx context.Context, key string) error {
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
 
