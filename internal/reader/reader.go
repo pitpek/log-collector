@@ -5,18 +5,20 @@ import (
 	"log"
 
 	"logcollector/internal/config"
-	"logcollector/internal/storage/clickhouse"
+	"logcollector/internal/repository"
 	kafkaConsumer "logcollector/pkg/kafka"
 
 	"github.com/segmentio/kafka-go"
 )
 
+// Reader представляет собой структуру для чтения сообщений из Kafka и сохранения их в базу данных.
 type Reader struct {
 	reader *kafka.Reader
-	db     *clickhouse.ClickHouse
+	db     *repository.Repository
 }
 
-func NewReader(cfg *config.KafkaConfig, db *clickhouse.ClickHouse) *Reader {
+// NewReader создает новый экземпляр Reader с предоставленной конфигурацией Kafka и репозиторием базы данных.
+func NewReader(cfg *config.KafkaConfig, db *repository.Repository) *Reader {
 	kafkaReader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers: cfg.Brokers,
 		Topic:   cfg.Topic,
@@ -28,17 +30,19 @@ func NewReader(cfg *config.KafkaConfig, db *clickhouse.ClickHouse) *Reader {
 	}
 }
 
+// Start запускает чтение сообщений из Kafka и их обработку.
 func (r *Reader) Start(ctx context.Context) {
 	cons := kafkaConsumer.NewConsumer(r.reader, r.db)
 	go func() {
 		if err := cons.Start(ctx); err != nil {
-			log.Fatalf("internal/consumer/consumer.go: Failed to start consumer: %v", err)
+			log.Fatalf("internal/reader/reader.go: Failed to start reader: %v", err)
 		}
 	}()
 }
 
+// Stop останавливает чтение сообщений из Kafka и закрывает reader.
 func (r *Reader) Stop() {
 	if err := r.reader.Close(); err != nil {
-		log.Printf("internal/consumer/consumer.go: Failed to close reader: %v", err)
+		log.Printf("internal/reader/reader.go: Failed to close reader: %v", err)
 	}
 }

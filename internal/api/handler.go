@@ -14,7 +14,5 @@ func prometheusHandler() http.Handler {
 
 func (r *Router) getLogs(c *gin.Context) {
 	log, _ := r.service.Logs.GetLogs()
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Logs retrieved successfully", "logs": log,
-	})
+	c.JSON(http.StatusOK, gin.H{"logs": log})
 }
