@@ -17,6 +17,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 // Инициализация всех зависимостей и возврат ошибки, если что-то пошло не так
@@ -46,12 +47,12 @@ func initialize(cfg *config.Config) (*clickhouse.ClickHouse, *redis.Client, *rea
 		return nil, nil, nil, nil, nil, nil, err
 	}
 
-	reader := reader.NewReader(&cfg.Kafka, db)
-	writer := writer.NewWriter(cfg.Kafka.Brokers, cfg.Kafka.Topic)
-
 	repo := repository.NewRepository(db)
 	service := service.NewService(repo)
 	handler := api.NewRouter(service)
+
+	reader := reader.NewReader(&cfg.Kafka, repo)
+	writer := writer.NewWriter(&cfg.Kafka)
 
 	serv := new(server.Server)
 
@@ -77,9 +78,19 @@ func main() {
 
 	reader.Start(ctx)
 
+	writer.Start(ctx)
+
+	ticker := time.NewTicker(2 * time.Second)
+	defer ticker.Stop()
+
 	go func() {
-		if err := writer.Start(ctx, cfg.Kafka.Key); err != nil {
-			log.Fatalf("cmd/app/main.go: Failed to start producer: %v", err)
+		for {
+			select {
+			case <-ticker.C:
+				log.Println("tick tick tick tick tick tick")
+			case <-ctx.Done():
+				return
+			}
 		}
 	}()
 
