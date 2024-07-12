@@ -28,6 +28,11 @@ func NewClickHouse(cfg *config.ClickHouseConfig) (*ClickHouse, error) {
 	return &ClickHouse{db: db}, nil
 }
 
+// NewClickHouseWithDB создает новый экземпляр ClickHouse с заданной базой данных
+func NewClickHouseWithDB(db *sql.DB) *ClickHouse {
+	return &ClickHouse{db: db}
+}
+
 // Close закрывает соединение с базой данных
 func (c *ClickHouse) Close() error {
 	return c.db.Close()
@@ -48,10 +53,7 @@ func (c *ClickHouse) Ping() error {
 // key - назваение приложения с которого пришло сообщение
 // message - сообщение, которое нужно вставить
 func (c *ClickHouse) InsertMessage(date time.Time, key, message string) error {
-	_, err := c.db.Exec(`
-		INSERT INTO logs 
-		(date, app_name, message) 
-		VALUES (?, ?, ?)`,
+	_, err := c.db.Exec("INSERT INTO logs (date, app_name, message) VALUES (?, ?, ?)",
 		date, key, message,
 	)
 	if err != nil {
