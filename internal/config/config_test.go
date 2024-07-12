@@ -15,11 +15,22 @@ func TestLoadConfig(t *testing.T) {
 
 	// Записываем пример конфигурации в файл
 	_, err = tempFile.Write([]byte(`
-kafka:
-  brokers: ["kafka:9092"]
-  topic: "test_topic"
 api:
   port: 8080
+kafka:
+  brokers: ["kafka:9092"]
+  topic: log-messages
+  key: log_collector
+redis:
+  address: redis:6379
+  password: ""
+  db: 0
+clickhouse:
+  host: clickhouse
+  port: 9000
+  user: clickhouse
+  password: clickhouse
+  dbname: log_collector
 `))
 	assert.NoError(t, err)
 	tempFile.Close()
@@ -29,7 +40,16 @@ api:
 	assert.NoError(t, err)
 
 	// Проверяем загруженные данные
-	assert.Equal(t, "kafka:9092", cfg.Kafka.Brokers[0])
-	assert.Equal(t, "test_topic", cfg.Kafka.Topic)
 	assert.Equal(t, 8080, cfg.API.Port)
+	assert.Equal(t, "kafka:9092", cfg.Kafka.Brokers[0])
+	assert.Equal(t, "log-messages", cfg.Kafka.Topic)
+	assert.Equal(t, "log_collector", cfg.Kafka.Key)
+	assert.Equal(t, "redis:6379", cfg.Redis.Address)
+	assert.Equal(t, "", cfg.Redis.Password)
+	assert.Equal(t, 0, cfg.Redis.DB)
+	assert.Equal(t, "clickhouse", cfg.ClickHouse.Host)
+	assert.Equal(t, 9000, cfg.ClickHouse.Port)
+	assert.Equal(t, "clickhouse", cfg.ClickHouse.User)
+	assert.Equal(t, "clickhouse", cfg.ClickHouse.Password)
+	assert.Equal(t, "log_collector", cfg.ClickHouse.DBName)
 }
