@@ -3,51 +3,39 @@ package producer
 import (
 	"context"
 	"log"
-	"time"
+	"logcollector/internal/config"
+
+	kafkaProducer "logcollector/pkg/kafka"
 
 	"github.com/segmentio/kafka-go"
 )
 
+// Writer представляет собой структуру для отправки сообщений в Kafka.
 type Writer struct {
 	writer *kafka.Writer
+	key    string
 }
 
-// NewProducer создает новый экземпляр Kafka producer
-// brokers - список брокеров Kafka
-// topic - тема Kafka, в которую нужно отправлять сообщения
-func NewWriter(brokers []string, topic string) *Writer {
+// NewWriter создает новый экземпляр Writer с предоставленной конфигурацией Kafka.
+// cfg - конфигурация Kafka, содержащая список брокеров, тему и ключ.
+func NewWriter(cfg *config.KafkaConfig) *Writer {
 	return &Writer{
 		writer: &kafka.Writer{
-			Addr:     kafka.TCP(brokers...),
-			Topic:    topic,
+			Addr:     kafka.TCP(cfg.Brokers...),
+			Topic:    cfg.Topic,
 			Balancer: &kafka.LeastBytes{},
 		},
+		key: cfg.Key,
 	}
 }
 
-// Start запускает процесс отправки сообщений в Kafka
-// ctx - контекст для управления жизненным циклом процесса
-func (p *Writer) Start(ctx context.Context, key string) error {
-	ticker := time.NewTicker(1 * time.Second)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case <-ticker.C:
-			// Здесь можно добавить логику для получения данных из ClickHouse или другого источника
-			messageValue := "some message" // Замените это на реальные данные
-
-			err := p.writer.WriteMessages(ctx, kafka.Message{
-				Key:   []byte(key),
-				Value: []byte(messageValue),
-			})
-			if err != nil {
-				log.Printf("internal/producer/producer.go: could not write message: %v", err)
-			} else {
-				log.Printf("internal/producer/producer.go: message sent: %s", messageValue)
-			}
+// Start запускает процесс отправки сообщений в Kafka.
+// ctx - контекст для управления жизненным циклом процесса.
+func (w *Writer) Start(ctx context.Context) {
+	prod := kafkaProducer.NewProducer(w.writer)
+	go func() {
+		if err := prod.Start(ctx, w.key); err != nil {
+			log.Fatalf("internal/writer/writer.go: Failed to start writer: %v", err)
 		}
-	}
+	}()
 }

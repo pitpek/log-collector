@@ -5,31 +5,22 @@ import (
 	"log"
 	"time"
 
+	"logcollector/internal/repository"
+
 	"github.com/segmentio/kafka-go"
 )
 
-// Storage представляет собой интерфейс для взаимодействия с хранилищем данных
-type Storage interface {
-	InsertMessage(date time.Time, key, message string) error
-}
-
-// Reader представляет собой интерфейс для чтения сообщений из Kafka
-type Reader interface {
-	ReadMessage(ctx context.Context) (kafka.Message, error)
-	Close() error
-}
-
 // Consumer представляет собой Kafka consumer, который читает сообщения из Kafka и сохраняет их в базе данных
 type Consumer struct {
-	reader  Reader
-	storage Storage
+	reader *kafka.Reader
+	repo   *repository.Repository
 }
 
 // NewConsumer создает новый экземпляр Kafka consumer
-func NewConsumer(reader Reader, storage Storage) *Consumer {
+func NewConsumer(reader *kafka.Reader, repo *repository.Repository) *Consumer {
 	return &Consumer{
-		reader:  reader,
-		storage: storage,
+		reader: reader,
+		repo:   repo,
 	}
 }
 
@@ -45,7 +36,7 @@ func (c *Consumer) Start(ctx context.Context) error {
 			continue
 		}
 
-		err = c.storage.InsertMessage(time.Now(), string(msg.Key), string(msg.Value))
+		err = c.repo.AddLog(time.Now(), string(msg.Key), string(msg.Value))
 		if err != nil {
 			log.Printf("pkg/kafka/consumer.go: could not insert message: %v", err)
 		} else {
