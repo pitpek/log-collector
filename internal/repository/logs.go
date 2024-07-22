@@ -26,7 +26,7 @@ func (lr *LogsRepository) AddLog(date time.Time, key, message string) error {
 		date, key, message,
 	)
 	if err != nil {
-		log.Printf("internal/storage/clickhouse.go: Failed to insert message into ClickHouse: %v", err)
+		log.Printf("internal/storage/clickhouse.go: Failed to insert log into ClickHouse: %v", err)
 		return err
 	}
 	return nil
