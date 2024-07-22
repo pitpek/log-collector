@@ -5,92 +5,102 @@ import (
 	"log"
 	"logcollector/internal/api"
 	"logcollector/internal/config"
-	"logcollector/internal/consumer"
-	"logcollector/internal/producer"
+	"logcollector/internal/reader"
+	"logcollector/internal/repository"
 	"logcollector/internal/server"
+	"logcollector/internal/service"
 	"logcollector/internal/storage/clickhouse"
 	"logcollector/internal/storage/redis"
+	"logcollector/internal/writer"
 	"logcollector/pkg/migrate"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
+// Инициализация всех зависимостей и возврат ошибки, если что-то пошло не так
+func initialize(cfg *config.Config) (*clickhouse.ClickHouse, *redis.Client, *reader.Reader, *writer.Writer, *api.Router, *server.Server, error) {
+	db, err := clickhouse.NewClickHouse(&cfg.ClickHouse)
+	if err != nil {
+		return nil, nil, nil, nil, nil, nil, err
+	}
+
+	err = db.Ping()
+	if err != nil {
+		return nil, nil, nil, nil, nil, nil, err
+	}
+
+	err = migrate.StartMigration(db.DB())
+	if err != nil {
+		return nil, nil, nil, nil, nil, nil, err
+	}
+
+	redisClient, err := redis.NewClient(&cfg.Redis)
+	if err != nil {
+		return nil, nil, nil, nil, nil, nil, err
+	}
+
+	err = redisClient.Ping()
+	if err != nil {
+		return nil, nil, nil, nil, nil, nil, err
+	}
+
+	repo := repository.NewRepository(db)
+	service := service.NewService(repo)
+	handler := api.NewRouter(service)
+
+	reader := reader.NewReader(&cfg.Kafka, repo)
+	writer := writer.NewWriter(&cfg.Kafka)
+
+	serv := new(server.Server)
+
+	return db, redisClient, reader, writer, handler, serv, nil
+}
+
 func main() {
-	// Загрузка конфигов
 	cfg, err := config.LoadConfig("configs/config.yaml")
 	if err != nil {
 		log.Fatalf("cmd/app/main.go: Failed to load config: %v", err)
 	}
 
-	// Инициализация ClickHouse
-	db, err := clickhouse.NewClickHouse(&cfg.ClickHouse)
+	db, redisClient, reader, writer, handler, serv, err := initialize(cfg)
+
 	if err != nil {
-		log.Fatalf("cmd/app/main.go: Failed to start clickhouse: %v", err)
+		log.Fatalf("cmd/app/main.go: Failed to initialize dependencies: %v", err)
 	}
 	defer db.Close()
-
-	// Проверка подключения к ClickHouse
-	err = db.Ping()
-	if err != nil {
-		log.Fatalf("cmd/app/main.go: Failed to ping clickhouse: %v", err)
-	}
-	log.Println("cmd/app/main.go: Database clickhouse connected")
-
-	// Создание таблиц в Clickhouse
-	err = migrate.StartMigration(db.DB())
-	if err != nil {
-		log.Fatalf("cmd/app/main.go: Failed to create clickhouse tables: %v", err)
-	}
-	log.Println("cmd/app/main.go: Tables clickhouse created successfully")
-
-	// Инициализация Redis
-	redisClient, err := redis.NewClient(&cfg.Redis)
-	if err != nil {
-		log.Fatalf("cmd/app/main.go: Failed to connect redis: %v", err)
-	}
 	defer redisClient.Close()
-
-	// Проверка подключения к redis
-	err = redisClient.Ping()
-	if err != nil {
-		log.Fatalf("cmd/app/main.go: Failed to ping Redis: %v", err)
-	}
-	log.Println("cmd/app/main.go: Redis connected successfully")
-
-	// Инициализация Consumer
-	cons := consumer.NewConsumer(cfg.Kafka.Brokers, cfg.Kafka.Topic, db)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	reader.Start(ctx)
+
+	writer.Start(ctx, cfg.Kafka.Key)
+
+	ticker := time.NewTicker(2 * time.Second)
+	defer ticker.Stop()
+
 	go func() {
-		if err := cons.Start(ctx); err != nil {
-			log.Fatalf("cmd/app/main.go: Failed to start consumer: %v", err)
+		for {
+			select {
+			case <-ticker.C:
+				log.Println("tick tick tick tick tick tick")
+			case <-ctx.Done():
+				return
+			}
 		}
 	}()
-	log.Println("cmd/app/main.go: Consumer started successfully")
 
-	// Инициализация Producer
-	prod := producer.NewProducer(cfg.Kafka.Brokers, cfg.Kafka.Topic)
 	go func() {
-		if err := prod.Start(ctx, cfg.Kafka.Key); err != nil {
-			log.Fatalf("cmd/app/main.go: Failed to start producer: %v", err)
-		}
-	}()
-	log.Println("cmd/app/main.go: Producer started successfully")
-
-	// Запуск HTTP-сервера
-	serv := new(server.Server)
-	go func() {
-		if err := serv.Run(cfg.API.Port, api.InitRoutes()); err != nil && err != http.ErrServerClosed {
+		if err := serv.Run(cfg.API.Port, handler.InitRoutes()); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("cmd/app/main.go: Failed to start server: %v", err)
 		}
 	}()
 	log.Println("cmd/app/main.go: Server started successfully")
 
-	// Ожидание комманды завершения программы
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 	<-sigCh

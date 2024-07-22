@@ -72,3 +72,8 @@ docker exec -it clickhouse clickhouse-client -h localhost --user clickhouse --pa
 ```
 use log_collector
 ```
+
+### Необходимо запустить docker чтобы выполнить clickhouse_test
+```
+docker run -d --name clickhouse_test -p 9000:9000 -p 8123:8123 yandex/clickhouse-server
+```

@@ -11,11 +11,12 @@ func StartMigration(db *sql.DB) error {
 		CREATE TABLE IF NOT EXISTS logs (
 			date DateTime,
 			app_name String,
+			message String
 		) ENGINE = MergeTree()
 		ORDER BY date
 	`)
 	if err != nil {
-		log.Printf("internal/storage/clickhouse.go: Failed to create table logs in ClickHouse: %v", err)
+		log.Printf("pkg/migrate/migrate.go: Failed to create table logs in ClickHouse: %v", err)
 	}
 	return err
 }

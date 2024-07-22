@@ -28,6 +28,16 @@ services:
       - logcollector_net
 
 
+  vector:
+    image: timberio/vector:0.39.0-debian
+    depends_on:
+      - kafka
+    volumes:
+      - ../configs/vector.toml:/etc/vector/vector.toml
+    networks:
+      - logcollector_net
+
+
   redis:
     image: redis
     container_name: redis
@@ -50,15 +60,15 @@ services:
       - logcollector_net
 
 
-  app:
+  logcollector:
     build:
         context: ..   #необходимо указать путь к Dockerfile
         dockerfile: deployments/Dockerfile
     depends_on:
       - clickhouse
-      - postgres
       - redis
       - kafka
+      - vector
     environment:
       KAFKA_BROKER: kafka:9092
     command: ["sh", "-c", "sleep 10 && go run cmd/app/main.go"]
@@ -73,9 +83,9 @@ services:
       context: ../../logproducer  #необходимо указать путь к исполняемому файлу producer в другом микросервисе 
     depends_on:
       - clickhouse
-      - postgres
       - redis
       - kafka
+      - logcollector
     environment:
       KAFKA_BROKER: kafka:9092
     command: ["sh", "-c", "sleep 10 && go run main.go"]
@@ -86,7 +96,7 @@ services:
   prometheus:
     image: prom/prometheus
     depends_on:
-      - app
+      - logcollector
       - producer
     ports:
       - "9090:9090"
