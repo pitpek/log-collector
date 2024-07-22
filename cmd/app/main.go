@@ -5,13 +5,13 @@ import (
 	"log"
 	"logcollector/internal/api"
 	"logcollector/internal/config"
-	reader "logcollector/internal/reader"
+	"logcollector/internal/reader"
 	"logcollector/internal/repository"
 	"logcollector/internal/server"
 	"logcollector/internal/service"
 	"logcollector/internal/storage/clickhouse"
 	"logcollector/internal/storage/redis"
-	writer "logcollector/internal/writer"
+	"logcollector/internal/writer"
 	"logcollector/pkg/migrate"
 	"net/http"
 	"os"
@@ -78,7 +78,7 @@ func main() {
 
 	reader.Start(ctx)
 
-	writer.Start(ctx)
+	writer.Start(ctx, cfg.Kafka.Key)
 
 	ticker := time.NewTicker(2 * time.Second)
 	defer ticker.Stop()
