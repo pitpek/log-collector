@@ -44,3 +44,8 @@ func (c *Consumer) Start(ctx context.Context) error {
 		}
 	}
 }
+
+// Stop останавливает чтение сообщений из Kafka и закрывает reader
+func (c *Consumer) Stop() error {
+	return c.reader.Close()
+}
