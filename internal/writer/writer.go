@@ -1,4 +1,4 @@
-package producer
+package writer
 
 import (
 	"context"
@@ -12,30 +12,28 @@ import (
 
 // Writer представляет собой структуру для отправки сообщений в Kafka.
 type Writer struct {
-	writer *kafka.Writer
-	key    string
+	kafkaProducer kafkaProducer.Producer
 }
 
 // NewWriter создает новый экземпляр Writer с предоставленной конфигурацией Kafka.
 // cfg - конфигурация Kafka, содержащая список брокеров, тему и ключ.
 func NewWriter(cfg *config.KafkaConfig) *Writer {
+	producer := kafkaProducer.NewProducer(&kafka.Writer{
+		Addr:     kafka.TCP(cfg.Brokers...),
+		Topic:    cfg.Topic,
+		Balancer: &kafka.LeastBytes{},
+	})
 	return &Writer{
-		writer: &kafka.Writer{
-			Addr:     kafka.TCP(cfg.Brokers...),
-			Topic:    cfg.Topic,
-			Balancer: &kafka.LeastBytes{},
-		},
-		key: cfg.Key,
+		kafkaProducer: *producer,
 	}
 }
 
 // Start запускает процесс отправки сообщений в Kafka.
 // ctx - контекст для управления жизненным циклом процесса.
-func (w *Writer) Start(ctx context.Context) {
-	prod := kafkaProducer.NewProducer(w.writer)
+func (w *Writer) Start(ctx context.Context, key string) {
 	go func() {
-		if err := prod.Start(ctx, w.key); err != nil {
-			log.Fatalf("internal/writer/writer.go: Failed to start writer: %v", err)
+		if err := w.kafkaProducer.Start(ctx, key); err != nil {
+			log.Fatalf("internal/witer/writer.go: Failed to start writer: %v", err)
 		}
 	}()
 }
