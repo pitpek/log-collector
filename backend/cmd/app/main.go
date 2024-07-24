@@ -83,16 +83,16 @@ func main() {
 	ticker := time.NewTicker(2 * time.Second)
 	defer ticker.Stop()
 
-	go func() {
-		for {
-			select {
-			case <-ticker.C:
-				log.Println("tick tick tick tick tick tick")
-			case <-ctx.Done():
-				return
-			}
-		}
-	}()
+	// go func() {
+	// 	for {
+	// 		select {
+	// 		case <-ticker.C:
+	// 			log.Println("tick tick tick tick tick tick")
+	// 		case <-ctx.Done():
+	// 			return
+	// 		}
+	// 	}
+	// }()
 
 	go func() {
 		if err := serv.Run(cfg.API.Port, handler.InitRoutes()); err != nil && err != http.ErrServerClosed {
