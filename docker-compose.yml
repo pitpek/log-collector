@@ -62,7 +62,7 @@ services:
 
   logcollector:
     build:
-        context: ..   #необходимо указать путь к Dockerfile
+        context: "./backend"   #необходимо указать путь к Dockerfile
         dockerfile: deployments/Dockerfile
     depends_on:
       - clickhouse
@@ -80,7 +80,7 @@ services:
 
   producer:
     build:
-      context: ../../logproducer  #необходимо указать путь к исполняемому файлу producer в другом микросервисе 
+      context: "../logproducer"  #необходимо указать путь к исполняемому файлу producer в другом микросервисе 
     depends_on:
       - clickhouse
       - redis
@@ -101,7 +101,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./backend/deployments/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - logcollector_net
 
@@ -112,8 +112,8 @@ services:
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
-      - ./grafana/dashboards:/var/lib/grafana/dashboards
-      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./backend/deployments/grafana/dashboards:/var/lib/grafana/dashboards
+      - ./backend/deployments/grafana/provisioning:/etc/grafana/provisioning
     ports:
       - "3000:3000"
     networks:

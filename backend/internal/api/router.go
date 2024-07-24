@@ -24,15 +24,17 @@ func (r *Router) InitRoutes() *gin.Engine {
 	// Добавление middleware для регистрации метрик
 	router.Use(monitoring.MetricsMiddleware())
 
-	metrics := router.Group("/metrics")
+	api := router.Group("/api")
 	{
-		metrics.GET("/", gin.WrapH(prometheusHandler()))
-	}
+		metrics := api.Group("/metrics")
+		{
+			metrics.GET("/", gin.WrapH(prometheusHandler()))
+		}
 
-	logs := router.Group("/logs")
-	{
-		logs.GET("/", r.getLogs)
+		logs := api.Group("/logs")
+		{
+			logs.GET("/", r.getLogs)
+		}
 	}
-
 	return router
 }
