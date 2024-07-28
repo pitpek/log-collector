@@ -1,4 +1,9 @@
 version: '2'
+
+networks:
+  logcollector_net:
+    driver: bridge
+    
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.4
@@ -127,9 +132,4 @@ services:
       - "9100:9100"
     networks:
       - logcollector_net
-
-
-networks:
-  logcollector_net:
-    driver: bridge
     
