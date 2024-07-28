@@ -51,7 +51,7 @@ func initialize(cfg *config.Config) (*clickhouse.ClickHouse, *redis.Client, *rea
 	service := service.NewService(repo)
 	handler := api.NewRouter(service)
 
-	reader := reader.NewReader(&cfg.Kafka, repo)
+	reader := reader.NewReader(&cfg.Kafka, service)
 	writer := writer.NewWriter(&cfg.Kafka)
 
 	serv := new(server.Server)

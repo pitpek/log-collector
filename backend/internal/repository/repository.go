@@ -3,12 +3,11 @@ package repository
 import (
 	"logcollector/internal/schemas"
 	"logcollector/internal/storage/clickhouse"
-	"time"
 )
 
 // Logs представляет интерфейс для работы с логами.
 type Logs interface {
-	AddLog(date time.Time, key, message string) error
+	AddLog(log schemas.Logs) error
 	GetLogs() ([]schemas.Logs, error)
 }
 

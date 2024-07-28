@@ -3,7 +3,6 @@ package service
 import (
 	"logcollector/internal/repository"
 	"logcollector/internal/schemas"
-	"time"
 )
 
 // LogsService представляет собой сервис для работы с логами, использующий репозиторий логов.
@@ -21,8 +20,8 @@ func NewLogsService(repo repository.Logs) *LogsService {
 // date - дата и время сообщения
 // key - название приложения, с которого пришло сообщение
 // message - сообщение, которое нужно вставить
-func (ls *LogsService) AddLog(date time.Time, key, message string) error {
-	return ls.repo.AddLog(date, key, message)
+func (ls *LogsService) AddLog(log schemas.Logs) error {
+	return ls.repo.AddLog(log)
 }
 
 // GetLogs извлекает все логи из репозитория.

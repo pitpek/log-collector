@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"logcollector/internal/storage/clickhouse" // замените на ваш путь к пакету clickhouse
+	"logcollector/internal/storage/clickhouse"
 
 	"github.com/stretchr/testify/assert"
 )

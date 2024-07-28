@@ -1,10 +1,9 @@
 package repository
 
 import (
-	"log"
+	logger "log"
 	"logcollector/internal/schemas"
 	"logcollector/internal/storage/clickhouse"
-	"time"
 )
 
 // LogsRepository представляет собой структуру для работы с логами в ClickHouse.
@@ -21,12 +20,12 @@ func NewLogsRepository(db *clickhouse.ClickHouse) *LogsRepository {
 // date - дата и время сообщения
 // key - название приложения, с которого пришло сообщение
 // message - сообщение, которое нужно вставить
-func (lr *LogsRepository) AddLog(date time.Time, key, message string) error {
+func (lr *LogsRepository) AddLog(log schemas.Logs) error {
 	_, err := lr.db.DB().Exec("INSERT INTO logs (date, app_name, message) VALUES (?, ?, ?)",
-		date, key, message,
+		log.Date, log.AppName, log.Message,
 	)
 	if err != nil {
-		log.Printf("internal/storage/clickhouse.go: Failed to insert log into ClickHouse: %v", err)
+		logger.Printf("internal/storage/clickhouse.go: Failed to insert log into ClickHouse: %v", err)
 		return err
 	}
 	return nil
@@ -36,7 +35,7 @@ func (lr *LogsRepository) AddLog(date time.Time, key, message string) error {
 func (lr *LogsRepository) GetLogs() ([]schemas.Logs, error) {
 	rows, err := lr.db.DB().Query("SELECT date, app_name, message FROM logs")
 	if err != nil {
-		log.Printf("internal/storage/clickhouse.go: Failed to query logs from ClickHouse: %v", err)
+		logger.Printf("internal/storage/clickhouse.go: Failed to query logs from ClickHouse: %v", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -45,14 +44,14 @@ func (lr *LogsRepository) GetLogs() ([]schemas.Logs, error) {
 	for rows.Next() {
 		var logRecord schemas.Logs
 		if err := rows.Scan(&logRecord.Date, &logRecord.AppName, &logRecord.Message); err != nil {
-			log.Printf("internal/storage/clickhouse.go: Failed to scan log row: %v", err)
+			logger.Printf("internal/storage/clickhouse.go: Failed to scan log row: %v", err)
 			return nil, err
 		}
 		logs = append(logs, logRecord)
 	}
 
 	if err := rows.Err(); err != nil {
-		log.Printf("internal/storage/clickhouse.go: Rows iteration error: %v", err)
+		logger.Printf("internal/storage/clickhouse.go: Rows iteration error: %v", err)
 		return nil, err
 	}
 

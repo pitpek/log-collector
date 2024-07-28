@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 	"logcollector/internal/config"
-	"logcollector/internal/repository"
+	"logcollector/internal/service"
 	kafkaConsumer "logcollector/pkg/kafka"
 
 	"github.com/segmentio/kafka-go"
@@ -16,13 +16,13 @@ type Reader struct {
 }
 
 // NewReader создает новый экземпляр Reader с предоставленной конфигурацией Kafka и репозиторием базы данных.
-func NewReader(cfg *config.KafkaConfig, db *repository.Repository) *Reader {
+func NewReader(cfg *config.KafkaConfig, service *service.Service) *Reader {
 	kafkaReader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers: cfg.Brokers,
 		Topic:   cfg.Topic,
 	})
 
-	consumer := kafkaConsumer.NewConsumer(kafkaReader, db)
+	consumer := kafkaConsumer.NewConsumer(kafkaReader, service)
 	return &Reader{
 		kafkaConsumer: consumer,
 	}
@@ -35,11 +35,4 @@ func (r *Reader) Start(ctx context.Context) {
 			log.Fatalf("internal/reader/reader.go: Failed to start reader: %v", err)
 		}
 	}()
-}
-
-// Stop останавливает чтение сообщений из Kafka и закрывает reader.
-func (r *Reader) Stop() {
-	if err := r.kafkaConsumer.Stop(); err != nil {
-		log.Printf("internal/reader/reader.go: Failed to close reader: %v", err)
-	}
 }

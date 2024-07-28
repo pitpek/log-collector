@@ -7,6 +7,7 @@ import (
 
 // Logs представляет интерфейс для получения логов.
 type Logs interface {
+	AddLog(log schemas.Logs) error
 	GetLogs() ([]schemas.Logs, error)
 }
 
